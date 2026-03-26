@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="style.css">
+  <title>Add Products</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input { margin: 5px; }
+    button { margin: 5px; padding: 5px 10px; cursor: pointer; }
+    table { border-collapse: collapse; width: 80%; margin-top: 10px; }
+    th, td { border: 1px solid black; padding: 5px; text-align: left; }
+    th { background-color: #f2f2f2; }
+  </style>
+</head>
+<body>
+<h1>Add Products</h1>
+<nav style="margin-bottom:20px;">
+  <a href="index.html">Home</a> |
+  <a href="products.html">Products</a> |
+  <a href="orders.html">Orders</a> |
+  <a href="clients.html">Clients</a>
+</nav>
+<hr>
+
+<input id="prodCode" placeholder="Product Code">
+<input id="prodName" placeholder="Product Name">
+<input id="prodPrice" type="number" placeholder="Price">
+<button onclick="addProduct()">Add Product</button>
+<br><br>
+
+<button onclick="showProducts()">Show Products</button>
+
+<div id="tables"></div>
+
+<script>
+let products = [];
+
+// Load products on page load
+fetch("http://localhost:3000/products")
+  .then(res => res.json())
+  .then(data => { products = data; });
+
+function addProduct() {
+  const code = document.getElementById("prodCode").value;
+  const name = document.getElementById("prodName").value;
+  const price = parseFloat(document.getElementById("prodPrice").value);
+
+  fetch("http://localhost:3000/product", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ code, name, price })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert(data.message);
+    products.push({code, name, price});
+    document.getElementById("prodCode").value = "";
+    document.getElementById("prodName").value = "";
+    document.getElementById("prodPrice").value = "";
+  });
+}
+
+// --- Show products in table ---
+function showProducts() {
+  fetch("http://localhost:3000/products")
+    .then(res => res.json())
+    .then(data => {
+      const div = document.getElementById("tables");
+      let html = "<h3>Products List</h3><table><tr><th>Code</th><th>Name</th><th>Price</th></tr>";
+      data.forEach(p => {
+        html += `<tr><td>${p.code}</td><td>${p.name}</td><td>${p.price}</td></tr>`;
+      });
+      html += "</table>";
+      div.innerHTML = html;
+    });
+}
+
+
+</script>
+</body>
+</html>

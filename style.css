@@ -1,0 +1,100 @@
+/* --- Import font --- */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+/* --- General Styles --- */
+body {
+  font-family: 'Roboto', sans-serif;
+  background: #e6f0ff;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h1, h2, h3 {
+  color: #003366;
+  margin: 10px 0;
+}
+
+nav a {
+  text-decoration: none;
+  color: #0059b3;
+  font-weight: 500;
+  margin: 0 10px;
+  transition: color 0.3s;
+}
+
+nav a:hover {
+  color: #004080;
+}
+
+/* --- Buttons --- */
+button, .menu-button {
+  background-color: #0059b3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 25px;
+  margin: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+  box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
+}
+
+button:hover, .menu-button:hover {
+  background-color: #004080;
+  transform: translateY(-2px);
+}
+
+/* --- Inputs & selects --- */
+input, select {
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  width: 250px;
+  max-width: 90%;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+/* --- Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin-top: 15px;
+  width: 100%;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 400px;
+}
+
+th, td {
+  border: 1px solid black;
+  padding: 8px;
+  text-align: left;
+  word-break: break-word;
+}
+
+th {
+  background-color: #cce0ff;
+}
+
+/* --- Lists --- */
+ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  h1 { font-size: 1.8em; }
+  h2, h3 { font-size: 1.2em; }
+  button, .menu-button { width: 80%; font-size: 15px; padding: 10px 0; }
+  input, select { width: 90%; }
+  nav a { display: block; margin: 5px 0; }
+}

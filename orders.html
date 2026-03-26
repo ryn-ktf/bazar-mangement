@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Orders - Bazar Management</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Orders Management</h1>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="clients.html">Clients</a>
+  </nav>
+
+  <h2>Add Order</h2>
+
+  <label>Select Existing Client:</label><br>
+  <select id="clientSelect">
+    <option value="">-- Choose existing client --</option>
+  </select>
+  <p>Or add a new client:</p>
+  <input id="newClientName" placeholder="Full Name">
+  <input id="newClientPhone" placeholder="Phone Number"><br>
+
+  <h3>Items</h3>
+  <div id="itemsContainer">
+    <div class="itemRow">
+      <select class="productSelect"></select>
+      <input type="number" class="qtyInput" min="1" value="1">
+      <button type="button" class="removeItemBtn">Remove</button>
+    </div>
+  </div>
+  <button id="addItemBtn">Add Another Item</button><br><br>
+
+  <input type="number" id="paidInput" placeholder="Amount Paid"><br>
+  <button id="addOrderBtn">Add Order</button>
+
+  <h2>Orders List</h2>
+  <div class="table-container">
+    <table id="ordersTable">
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Paid</th>
+          <th>Remaining</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const clientSelect = document.getElementById("clientSelect");
+    const ordersTable = document.querySelector("#ordersTable tbody");
+    const itemsContainer = document.getElementById("itemsContainer");
+
+    function loadClients() {
+      fetch("http://localhost:3000/clients")
+        .then(res => res.json())
+        .then(data => {
+          clientSelect.innerHTML = '<option value="">-- Choose existing client --</option>';
+          data.forEach(c => {
+            const option = document.createElement("option");
+            option.value = JSON.stringify(c); // store client object
+            option.text = `${c.fullName} - ${c.phone}`;
+            clientSelect.appendChild(option);
+          });
+        });
+    }
+
+    function loadProducts() {
+      fetch("http://localhost:3000/products")
+        .then(res => res.json())
+        .then(products => {
+          document.querySelectorAll(".productSelect").forEach(select => {
+            select.innerHTML = '';
+            products.forEach(p => {
+              const option = document.createElement("option");
+              option.value = p.code;
+              option.text = `${p.name} (${p.code}) - $${p.price}`;
+              select.appendChild(option);
+            });
+          });
+        });
+    }
+
+    function loadOrders() {
+      fetch("http://localhost:3000/orders")
+        .then(res => res.json())
+        .then(orders => {
+          ordersTable.innerHTML = '';
+          orders.forEach(o => {
+            const tr = document.createElement("tr");
+            const itemsText = o.items.map(i => `${i.name} x${i.qty}`).join(", ");
+            tr.innerHTML = `<td>${o.client.fullName} - ${o.client.phone}</td>
+                            <td>${itemsText}</td>
+                            <td>${o.total}</td>
+                            <td>${o.paid}</td>
+                            <td>${o.remaining}</td>
+                            <td>${new Date(o.date).toLocaleString()}</td>`;
+            ordersTable.appendChild(tr);
+          });
+        });
+    }
+
+    document.getElementById("addItemBtn").addEventListener("click", () => {
+      const div = document.createElement("div");
+      div.className = "itemRow";
+      div.innerHTML = `<select class="productSelect"></select>
+                       <input type="number" class="qtyInput" min="1" value="1">
+                       <button type="button" class="removeItemBtn">Remove</button>`;
+      itemsContainer.appendChild(div);
+      loadProducts();
+
+      div.querySelector(".removeItemBtn").addEventListener("click", () => div.remove());
+    });
+
+    document.getElementById("addOrderBtn").addEventListener("click", () => {
+      let client;
+      if(clientSelect.value) {
+        client = JSON.parse(clientSelect.value);
+      } else {
+        const name = document.getElementById("newClientName").value.trim();
+        const phone = document.getElementById("newClientPhone").value.trim();
+        if(!name || !phone){ alert("Please select or enter a client"); return; }
+        client = { fullName: name, phone };
+      }
+
+      const items = [];
+      document.querySelectorAll(".itemRow").forEach(row => {
+        const code = row.querySelector(".productSelect").value;
+        const qty = Number(row.querySelector(".qtyInput").value);
+        if(code && qty > 0) items.push({ code, qty });
+      });
+      if(items.length === 0){ alert("Add at least one item"); return; }
+
+      const paid = Number(document.getElementById("paidInput").value) || 0;
+
+      fetch("http://localhost:3000/order", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ client, items, paid })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if(data.error) alert(data.error);
+        else {
+          alert("Order added!");
+          document.getElementById("newClientName").value = '';
+          document.getElementById("newClientPhone").value = '';
+          document.getElementById("paidInput").value = '';
+          loadOrders();
+          loadClients(); // update client dropdown
+        }
+      });
+    });
+
+    // Initial load
+    loadClients();
+    loadProducts();
+    loadOrders();
+  </script>
+</body>
+</html>

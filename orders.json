@@ -1,0 +1,88 @@
+[
+  {
+    "client": "",
+    "items": [],
+    "total": 0,
+    "paid": -2,
+    "remaining": 2,
+    "date": "2026-03-26T19:36:55.650Z"
+  },
+  {
+    "client": "",
+    "items": [],
+    "total": 0,
+    "paid": 0,
+    "remaining": 0,
+    "date": "2026-03-26T19:47:28.552Z"
+  },
+  {
+    "client": {
+      "fullName": "rir",
+      "phone": "0796113777",
+      "orders": []
+    },
+    "items": [
+      {
+        "code": "po4",
+        "name": "9ach",
+        "qty": 1,
+        "subtotal": 200
+      },
+      {
+        "code": "po4",
+        "name": "9ach",
+        "qty": 1,
+        "subtotal": 200
+      }
+    ],
+    "total": 400,
+    "paid": 50,
+    "remaining": 350,
+    "date": "2026-03-26T20:16:16.127Z"
+  },
+  {
+    "client": {
+      "fullName": "rir",
+      "phone": "0796113777",
+      "orders": [
+        {
+          "client": {
+            "fullName": "rir",
+            "phone": "0796113777",
+            "orders": []
+          },
+          "items": [
+            {
+              "code": "po4",
+              "name": "9ach",
+              "qty": 1,
+              "subtotal": 200
+            },
+            {
+              "code": "po4",
+              "name": "9ach",
+              "qty": 1,
+              "subtotal": 200
+            }
+          ],
+          "total": 400,
+          "paid": 50,
+          "remaining": 350,
+          "date": "2026-03-26T20:16:16.127Z"
+        }
+      ]
+    },
+    "items": [
+      {
+        "code": "70",
+        "name": "t9chir",
+        "qty": 7,
+        "subtotal": 140
+      }
+    ],
+    "total": 140,
+    "paid": 70,
+    "remaining": 70,
+    "date": "2026-03-26T20:17:00.735Z"
+  }
+]

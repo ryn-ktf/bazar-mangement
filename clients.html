@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Clients - Bazar Management</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Clients Management</h1>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="orders.html">Orders</a>
+  </nav>
+
+  <h2>Add Client</h2>
+  <input id="fullName" placeholder="Full Name"><br>
+  <input id="phone" placeholder="Phone Number"><br>
+  <button id="addClientBtn">Add Client</button>
+  <button id="showClientsBtn">Show Clients</button>
+
+  <h2>Clients List</h2>
+  <div class="table-container">
+    <table id="clientsTable">
+      <thead>
+        <tr>
+          <th>Full Name</th>
+          <th>Phone Number</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const clientsTable = document.querySelector("#clientsTable tbody");
+
+    function loadClients() {
+      fetch("http://localhost:3000/clients")
+        .then(res => res.json())
+        .then(data => {
+          clientsTable.innerHTML = '';
+          data.forEach(c => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${c.fullName}</td><td>${c.phone}</td>`;
+            clientsTable.appendChild(tr);
+          });
+        });
+    }
+
+    document.getElementById("addClientBtn").addEventListener("click", () => {
+      const fullName = document.getElementById("fullName").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      if(!fullName || !phone){
+        alert("Please enter full name and phone number.");
+        return;
+      }
+
+      fetch("http://localhost:3000/client", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ fullName, phone })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if(data.error) alert(data.error);
+        else {
+          document.getElementById("fullName").value = '';
+          document.getElementById("phone").value = '';
+          loadClients(); // update table
+        }
+      });
+    });
+
+    document.getElementById("showClientsBtn").addEventListener("click", () => {
+      loadClients(); // refresh table
+    });
+
+    loadClients(); // initial load
+  </script>
+</body>
+</html>
