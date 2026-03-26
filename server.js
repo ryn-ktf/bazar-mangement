@@ -3,12 +3,14 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 
-// Serve frontend files
-app.use(express.static(path.join(__dirname, "public")));
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+
+// Serve frontend files
+app.use(express.static(path.join(__dirname, "public")));
 
 const PRODUCTS_FILE = path.join(__dirname, "products.json");
 const ORDERS_FILE = path.join(__dirname, "orders.json");
