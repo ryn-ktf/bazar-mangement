@@ -12,11 +12,10 @@ app.use(express.json());
 // Serve frontend files
 app.use(express.static(path.join(__dirname, "public")));
 
-const PRODUCTS_FILE = path.join(__dirname, "products.json");
-const ORDERS_FILE = path.join(__dirname, "orders.json");
-const CLIENTS_FILE = path.join(__dirname, "clients.json");
+const PRODUCTS_FILE = "products.json";
+const ORDERS_FILE = "orders.json";
+const CLIENTS_FILE = "clients.json";
 
-// --- Helper functions ---
 function readJSON(file) {
   try { return JSON.parse(fs.readFileSync(file, "utf8")); }
   catch { return []; }
@@ -119,7 +118,10 @@ app.get("/orders", (req, res) => {
   res.json(readJSON(ORDERS_FILE));
 });
 
-app.listen(3000, () => console.log("Server running on http://localhost:3000"));
+
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
