@@ -10,9 +10,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const PRODUCTS_FILE = "products.json";
-const ORDERS_FILE = "orders.json";
-const CLIENTS_FILE = "clients.json";
+const PRODUCTS_FILE = path.join(__dirname, "products.json");
+const ORDERS_FILE = path.join(__dirname, "orders.json");
+const CLIENTS_FILE = path.join(__dirname, "clients.json");
 
 // --- Helper functions ---
 function readJSON(file) {
@@ -118,3 +118,6 @@ app.get("/orders", (req, res) => {
 });
 
 app.listen(3000, () => console.log("Server running on http://localhost:3000"));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
