@@ -1,6 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
+const path = require("path");
+
+// Serve frontend files
+app.use(express.static(path.join(__dirname, "public")));
 
 const app = express();
 app.use(cors());
