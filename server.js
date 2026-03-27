@@ -7,8 +7,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
-const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
+const SUPABASE_URL = "https://vlbjbpotsxssihebodyh.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsYmpicG90c3hzc2loZWJvZHloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NjI0MjksImV4cCI6MjA5MDEzODQyOX0.xWN9LO5_Rl6JIKZpVOpm-YOSoEwfVwH8FwN3T8I30wE";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // --- Products ---
