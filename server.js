@@ -25,11 +25,30 @@ app.post("/product", async (req, res) => {
   res.json({ message: "Product added" });
 });
 
+
 app.get("/products", async (req, res) => {
   const { data, error } = await supabase.from("products").select("*");
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
+
+app.post("/update-product", async (req, res) => {
+  const { code, price } = req.body;
+
+  if (!code || !price) {
+    return res.status(400).json({ error: "Code and price required" });
+  }
+
+  const { error } = await supabase
+    .from("products")
+    .update({ price })
+    .eq("code", code);
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  res.json({ message: "Price updated" });
+});
+
 
 // --- Clients ---
 app.post("/client", async (req, res) => {

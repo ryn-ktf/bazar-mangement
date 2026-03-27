@@ -28,8 +28,8 @@
   <!-- Table to display products -->
   <table>
     <thead>
-      <tr><th>Code</th><th>Name</th><th>Price</th></tr>
-    </thead>
+     <tr><th>Code</th><th>Name</th><th>Price</th><th>Action</th></tr>
+       </thead>
     <tbody id="productsTableBody"></tbody>
   </table>
 
@@ -62,11 +62,41 @@
       tbody.innerHTML = "";
       products.forEach(p => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${p.code}</td><td>${p.name}</td><td>${p.price}</td>`;
-        tbody.appendChild(tr);
+    tr.innerHTML = `
+    <td>${p.code}</td>
+    <td>${p.name}</td>
+    <td>
+       <input type="number" value="${p.price}" id="price-${p.code}">
+    </td>
+    <td>
+      <button onclick="updatePrice('${p.code}')">Save</button>
+    </td>
+   `;
+           tbody.appendChild(tr);
       });
     }
     displayProducts(); // call once when page loads
+
+    
+
+   async function updatePrice(code) {
+  const newPrice = document.getElementById(`price-${code}`).value;
+
+  const res = await fetch("/update-product", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ code, price: Number(newPrice) })
+  });
+
+  const data = await res.json();
+
+  if (data.error) alert(data.error);
+  else {
+    alert("Price updated!");
+    displayProducts();
+  }
+}
+ 
   </script>
 </body>
 </html>
