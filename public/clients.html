@@ -23,7 +23,7 @@
   </select>
 
 <button onclick="printClientReceipt()">Print Receipt</button>
-
+<input id="clientSearch" placeholder="Search clients by name...">
 
   <table>
     <thead><tr><th>Full Name</th><th>Phone</th></tr></thead>
@@ -76,6 +76,32 @@
       });
     });
 }
+const clientSearch = document.getElementById("clientSearch");
+const clientsTbody = document.getElementById("clientsTableBody");
+let allClients = [];
+
+async function displayClients() {
+  const res = await fetch("/clients");
+  allClients = await res.json();
+  renderClients(allClients);
+}
+
+function renderClients(clients) {
+  clientsTbody.innerHTML = "";
+  clients.forEach(c => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${c.fullName}</td><td>${c.phone}</td>`;
+    clientsTbody.appendChild(tr);
+  });
+}
+
+clientSearch.addEventListener("input", () => {
+  const term = clientSearch.value.toLowerCase();
+  const filtered = allClients.filter(c => c.fullName.toLowerCase().includes(term));
+  renderClients(filtered);
+});
+
+displayClients();
 async function printClientReceipt() {
   const selected = document.getElementById("clientReceiptSelect").value;
 

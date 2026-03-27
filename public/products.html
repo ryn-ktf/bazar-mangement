@@ -26,6 +26,7 @@
   <button id="addProductBtn">Add Product</button>
 
   <!-- Table to display products -->
+   <input id="productSearch" placeholder="Search products by name...">
   <table>
     <thead>
      <tr><th>Code</th><th>Name</th><th>Price</th><th>Action</th></tr>
@@ -53,6 +54,32 @@
         displayProducts();
       }
     });
+    const productSearch = document.getElementById("productSearch");
+const tbody = document.getElementById("productsTableBody");
+let allProducts = [];
+
+async function displayProducts() {
+  const res = await fetch("/products");
+  allProducts = await res.json(); // store all products globally
+  renderProducts(allProducts);
+}
+
+function renderProducts(products) {
+  tbody.innerHTML = "";
+  products.forEach(p => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${p.code}</td><td>${p.name}</td><td>${p.price}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+// filter when typing
+productSearch.addEventListener("input", () => {
+  const term = productSearch.value.toLowerCase();
+  const filtered = allProducts.filter(p => p.name.toLowerCase().includes(term));
+  renderProducts(filtered);
+});
+
+displayProducts();
 
     // Display Products Table
     async function displayProducts() {
