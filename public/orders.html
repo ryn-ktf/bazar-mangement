@@ -59,8 +59,7 @@
     const itemsContainer = document.getElementById("itemsContainer");
 
     function loadClients() {
-      fetch("http://localhost:3000/clients")
-        .then(res => res.json())
+      fetch("/clients")        .then(res => res.json())
         .then(data => {
           clientSelect.innerHTML = '<option value="">-- Choose existing client --</option>';
           data.forEach(c => {
@@ -73,7 +72,7 @@
     }
 
     function loadProducts() {
-      fetch("http://localhost:3000/products")
+      fetch("/products")
         .then(res => res.json())
         .then(products => {
           document.querySelectorAll(".productSelect").forEach(select => {
@@ -89,7 +88,7 @@
     }
 
     function loadOrders() {
-      fetch("http://localhost:3000/orders")
+      fetch("/orders")
         .then(res => res.json())
         .then(orders => {
           ordersTable.innerHTML = '';
@@ -140,7 +139,7 @@
 
       const paid = Number(document.getElementById("paidInput").value) || 0;
 
-      fetch("http://localhost:3000/order", {
+      fetch("/order", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify({ client, items, paid })
