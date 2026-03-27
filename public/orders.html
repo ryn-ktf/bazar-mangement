@@ -26,10 +26,12 @@
   <h3>Items</h3>
   <div id="itemsContainer">
     <div class="itemRow">
-      <select class="productSelect"></select>
-      <input type="number" class="qtyInput" min="1" value="1">
-      <button type="button" class="removeItemBtn">Remove</button>
-    </div>
+  <select class="productSelect"></select>
+  <input type="number" class="qtyInput" min="1" value="1">
+  <input type="number" class="priceInput" placeholder="Custom price (optional)">
+  <button type="button" class="removeItemBtn">Remove</button>
+</div>
+
   </div>
   <button id="addItemBtn">Add Another Item</button><br><br>
 
@@ -94,7 +96,12 @@
           ordersTable.innerHTML = '';
           orders.forEach(o => {
             const tr = document.createElement("tr");
-            const itemsText = o.items.map(i => `${i.name} x${i.qty}`).join(", ");
+   const itemsText = o.items.map(i => {
+     if (i.unitPrice) {
+      return `${i.name} x${i.qty} ($${i.unitPrice})`;
+      }
+      return `${i.name} x${i.qty}`;
+     }).join(", ");
             tr.innerHTML = `<td>${o.client.fullName} - ${o.client.phone}</td>
                             <td>${itemsText}</td>
                             <td>${o.total}</td>
@@ -110,8 +117,10 @@
       const div = document.createElement("div");
       div.className = "itemRow";
       div.innerHTML = `<select class="productSelect"></select>
-                       <input type="number" class="qtyInput" min="1" value="1">
-                       <button type="button" class="removeItemBtn">Remove</button>`;
+                 <input type="number" class="qtyInput" min="1" value="1">
+                 <input type="number" class="priceInput" placeholder="Custom price (optional)">
+                 <button type="button" class="removeItemBtn">Remove</button>`;
+
       itemsContainer.appendChild(div);
       loadProducts();
 
@@ -129,12 +138,21 @@
         client = { fullName: name, phone };
       }
 
-      const items = [];
-      document.querySelectorAll(".itemRow").forEach(row => {
-        const code = row.querySelector(".productSelect").value;
-        const qty = Number(row.querySelector(".qtyInput").value);
-        if(code && qty > 0) items.push({ code, qty });
-      });
+const items = [];
+document.querySelectorAll(".itemRow").forEach(row => {
+  const code = row.querySelector(".productSelect").value;
+  const qty = Number(row.querySelector(".qtyInput").value);
+  const customPrice = row.querySelector(".priceInput").value;
+
+  if (code && qty > 0) {
+    items.push({
+      code,
+      qty,
+      unitPrice: customPrice ? Number(customPrice) : null
+    });
+  }
+});
+
       if(items.length === 0){ alert("Add at least one item"); return; }
 
       const paid = Number(document.getElementById("paidInput").value) || 0;

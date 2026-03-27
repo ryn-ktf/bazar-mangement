@@ -87,9 +87,10 @@ app.post("/order", async (req, res) => {
   const detailedItems = items.map(i => {
     const product = allProducts.find(p => p.code === i.code);
     if (!product) throw new Error(`Product ${i.code} not found`);
-    const subtotal = product.price * i.qty;
+    const price = i.unitPrice || product.price;
+    const subtotal = price * i.qty;
     total += subtotal;
-    return { ...i, name: product.name, subtotal };
+return { ...i, name: product.name, priceUsed: price, subtotal };
   });
 
   const order = { client, items: detailedItems, total, paid: paid || 0, remaining: total - (paid || 0), date: new Date().toISOString() };
