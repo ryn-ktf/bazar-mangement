@@ -1,86 +1,89 @@
 const express = require("express");
 const cors = require("cors");
-const fs = require("fs");
-const path = require("path");
+const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));  // serve frontend files
+app.use(express.static("public"));
 
-const PRODUCTS_FILE = "products.json";
-const ORDERS_FILE = "orders.json";
-const CLIENTS_FILE = "clients.json";
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Helper functions
-function readJSON(file) {
-  try { return JSON.parse(fs.readFileSync(file, "utf8")); }
-  catch { return []; }
-}
-
-function writeJSON(file, data) {
-  fs.writeFileSync(file, JSON.stringify(data, null, 2));
-}
-
-// --- Routes ---
-app.post("/product", (req, res) => {
+// --- Products ---
+app.post("/product", async (req, res) => {
   const { code, name, price } = req.body;
   if (!code || !name || !price) return res.status(400).json({ error: "All fields required" });
 
-  const products = readJSON(PRODUCTS_FILE);
-  if (products.find(p => p.code === code)) return res.status(400).json({ error: "Code exists" });
+  const { data: existing } = await supabase.from("products").select("*").eq("code", code);
+  if (existing.length) return res.status(400).json({ error: "Code exists" });
 
-  products.push({ code, name, price });
-  writeJSON(PRODUCTS_FILE, products);
+  const { error } = await supabase.from("products").insert([{ code, name, price }]);
+  if (error) return res.status(500).json({ error: error.message });
+
   res.json({ message: "Product added" });
 });
 
-app.post("/client", (req, res) => {
+app.get("/products", async (req, res) => {
+  const { data, error } = await supabase.from("products").select("*");
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// --- Clients ---
+app.post("/client", async (req, res) => {
   const { fullName, phone } = req.body;
   if (!fullName || !phone) return res.status(400).json({ error: "Full name and phone required" });
 
-  const clients = readJSON(CLIENTS_FILE);
-  if (clients.find(c => c.fullName === fullName && c.phone === phone))
-    return res.status(400).json({ error: "Client exists" });
+  const { data: existing } = await supabase.from("clients").select("*").eq("fullName", fullName).eq("phone", phone);
+  if (existing.length) return res.status(400).json({ error: "Client exists" });
 
-  clients.push({ fullName, phone });
-  writeJSON(CLIENTS_FILE, clients);
+  const { error } = await supabase.from("clients").insert([{ fullName, phone }]);
+  if (error) return res.status(500).json({ error: error.message });
+
   res.json({ message: "Client added" });
 });
 
-app.get("/clients", (req, res) => {
-  res.json(readJSON(CLIENTS_FILE));
+app.get("/clients", async (req, res) => {
+  const { data, error } = await supabase.from("clients").select("*");
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
 });
 
-app.post("/order", (req, res) => {
+// --- Orders ---
+app.post("/order", async (req, res) => {
   const { client, items, paid } = req.body;
   if (!client || !items || items.length === 0) return res.status(400).json({ error: "Invalid order" });
 
-  const clients = readJSON(CLIENTS_FILE);
-  if (!clients.find(c => c.fullName === client.fullName && c.phone === client.phone)) {
-    clients.push(client);
-    writeJSON(CLIENTS_FILE, clients);
+  // Ensure client exists
+  const { data: existingClients } = await supabase.from("clients").select("*").eq("fullName", client.fullName).eq("phone", client.phone);
+  if (existingClients.length === 0) {
+    await supabase.from("clients").insert([client]);
   }
 
-  const products = readJSON(PRODUCTS_FILE);
+  // Fetch products
+  const { data: allProducts } = await supabase.from("products").select("*");
   let total = 0;
   const detailedItems = items.map(i => {
-    const product = products.find(p => p.code === i.code);
+    const product = allProducts.find(p => p.code === i.code);
     if (!product) throw new Error(`Product ${i.code} not found`);
     const subtotal = product.price * i.qty;
     total += subtotal;
     return { ...i, name: product.name, subtotal };
   });
 
-  const order = { client, items: detailedItems, total, paid: paid || 0, remaining: total - (paid || 0), date: new Date() };
-  const orders = readJSON(ORDERS_FILE);
-  orders.push(order);
-  writeJSON(ORDERS_FILE, orders);
+  const order = { client, items: detailedItems, total, paid: paid || 0, remaining: total - (paid || 0), date: new Date().toISOString() };
+  const { error } = await supabase.from("orders").insert([order]);
+  if (error) return res.status(500).json({ error: error.message });
 
   res.json({ message: "Order added" });
 });
 
-app.get("/products", (req, res) => res.json(readJSON(PRODUCTS_FILE)));
-app.get("/orders", (req, res) => res.json(readJSON(ORDERS_FILE)));
+app.get("/orders", async (req, res) => {
+  const { data, error } = await supabase.from("orders").select("*");
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
 
 app.listen(process.env.PORT || 3000, () => console.log("Server running"));
