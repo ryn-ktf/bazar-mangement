@@ -1,58 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Clients</title>
-  <link rel="stylesheet" href="style.css">
-</head>
 <body>
-  <nav>
-    <button onclick="window.location.href='index.html'">Home</button>
-    <button onclick="window.location.href='products.html'">Products</button>
-    <button onclick="window.location.href='orders.html'">Orders</button>
-  </nav>
-
-  <h1>Manage Clients</h1>
-
-  <input id="fullName" placeholder="Full Name">
-  <input id="phone" placeholder="Phone">
+  <input id="clientName" placeholder="Full Name">
+  <input id="clientPhone" placeholder="Phone">
   <button id="addClientBtn">Add Client</button>
-  <button id="showClientsBtn">Show/Hide Client List</button>
 
-  <div id="clientsContainer" style="display:none;">
-    <h2>Client List</h2>
-    <table id="clientsTable">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Phone</th>
-          <th>Orders</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  <table>
+    <thead><tr><th>Full Name</th><th>Phone</th></tr></thead>
+    <tbody id="clientsTableBody"></tbody>
+  </table>
 
   <script>
-    let clientsVisible = false;
-
-    async function loadClients() {
-      const res = await fetch('/clients');
-      const clients = await res.json();
-      const tbody = document.querySelector("#clientsTable tbody");
-      tbody.innerHTML = "";
-      clients.forEach(c => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${c.fullName}</td><td>${c.phone}</td><td>${c.orders.length}</td>`;
-        tbody.appendChild(tr);
-      });
-    }
-
     document.getElementById("addClientBtn").addEventListener("click", async () => {
-      const fullName = document.getElementById("fullName").value;
-      const phone = document.getElementById("phone").value;
-      if (!fullName || !phone) return alert("Full name and phone required");
-
+      const fullName = document.getElementById("clientName").value;
+      const phone = document.getElementById("clientPhone").value;
+      if (!fullName || !phone) return alert("All fields required!");
       const res = await fetch("/client", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
@@ -60,17 +20,23 @@
       });
       const data = await res.json();
       if (data.error) alert(data.error);
-      else alert("Client added!");
-      document.getElementById("fullName").value = "";
-      document.getElementById("phone").value = "";
-      if (clientsVisible) loadClients();
+      else {
+        alert("Client added!");
+        displayClients();
+      }
     });
 
-    document.getElementById("showClientsBtn").addEventListener("click", () => {
-      clientsVisible = !clientsVisible;
-      document.getElementById("clientsContainer").style.display = clientsVisible ? "block" : "none";
-      if (clientsVisible) loadClients();
-    });
+    async function displayClients() {
+      const res = await fetch("/clients");
+      const clients = await res.json();
+      const tbody = document.getElementById("clientsTableBody");
+      tbody.innerHTML = "";
+      clients.forEach(c => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${c.fullName}</td><td>${c.phone}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    displayClients();
   </script>
 </body>
-</html>
