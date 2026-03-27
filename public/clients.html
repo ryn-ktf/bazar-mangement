@@ -15,6 +15,15 @@
   <input id="clientName" placeholder="Full Name">
   <input id="clientPhone" placeholder="Phone">
   <button id="addClientBtn">Add Client</button>
+   
+  <h3>Print Receipt</h3>
+
+  <select id="clientReceiptSelect">
+  <option value="">-- Select Client --</option>
+  </select>
+
+<button onclick="printClientReceipt()">Print Receipt</button>
+
 
   <table>
     <thead><tr><th>Full Name</th><th>Phone</th></tr></thead>
@@ -51,6 +60,121 @@
       });
     }
     displayClients();
+
+    function loadClientsForReceipt() {
+  fetch("/clients")
+    .then(res => res.json())
+    .then(data => {
+      const select = document.getElementById("clientReceiptSelect");
+      select.innerHTML = '<option value="">-- Select Client --</option>';
+
+      data.forEach(c => {
+        const option = document.createElement("option");
+        option.value = JSON.stringify(c);
+        option.text = `${c.fullName} - ${c.phone}`;
+        select.appendChild(option);
+      });
+    });
+}
+async function printClientReceipt() {
+  const selected = document.getElementById("clientReceiptSelect").value;
+
+  if (!selected) {
+    alert("Select a client first");
+    return;
+  }
+
+  const client = JSON.parse(selected);
+
+  const res = await fetch("/orders");
+  const orders = await res.json();
+
+  const clientOrders = orders.filter(o =>
+    o.client.fullName === client.fullName &&
+    o.client.phone === client.phone
+  );
+
+  if (clientOrders.length === 0) {
+    alert("No orders found");
+    return;
+  }
+
+  let total = 0;
+  let paid = 0;
+
+  let rows = "";
+
+  clientOrders.forEach(o => {
+    o.items.forEach(i => {
+      rows += `
+        <tr>
+          <td>${new Date(o.date).toLocaleDateString()}</td>
+          <td>${i.name}</td>
+          <td>${i.qty}</td>
+          <td>${i.priceUsed || ""}</td>
+          <td>${i.subtotal}</td>
+        </tr>
+      `;
+    });
+
+    total += o.total;
+    paid += o.paid;
+  });
+
+  const remaining = total - paid;
+
+  const html = `
+    <h2 style="text-align:center;">Client Receipt</h2>
+
+    <p><strong>Name:</strong> ${client.fullName}</p>
+    <p><strong>Phone:</strong> ${client.phone}</p>
+
+    <table border="1" cellspacing="0" cellpadding="5" width="100%">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Product</th>
+          <th>Qty</th>
+          <th>Unit Price</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+
+    <h3>Total: ${total}</h3>
+    <h3>Paid: ${paid}</h3>
+    <h3>Remaining: ${remaining}</h3>
+  `;
+
+  const win = window.open("", "", "width=800,height=700");
+
+  win.document.write(`
+    <html>
+      <head>
+        <title>Receipt</title>
+        <style>
+          body { font-family: Arial; padding: 20px; }
+          table { border-collapse: collapse; }
+          th { background: #eee; }
+          h2 { margin-bottom: 20px; }
+        </style>
+      </head>
+      <body>
+        ${html}
+      </body>
+    </html>
+  `);
+
+  win.document.close();
+  win.print();
+}
+
+loadClientsForReceipt();
+
+
   </script>
 </body>
 </html>
