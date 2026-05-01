@@ -73,18 +73,25 @@
         });
     }
 
+    let cachedProducts = [];
+
+    function populateSelect(select, products) {
+      select.innerHTML = '';
+      products.forEach(p => {
+        const option = document.createElement("option");
+        option.value = p.code;
+        option.text = `${p.name} (${p.code}) - $${p.price}`;
+        select.appendChild(option);
+      });
+    }
+
     function loadProducts() {
       fetch("/products")
         .then(res => res.json())
         .then(products => {
+          cachedProducts = products;
           document.querySelectorAll(".productSelect").forEach(select => {
-            select.innerHTML = '';
-            products.forEach(p => {
-              const option = document.createElement("option");
-              option.value = p.code;
-              option.text = `${p.name} (${p.code}) - $${p.price}`;
-              select.appendChild(option);
-            });
+            populateSelect(select, products);
           });
         });
     }
@@ -122,7 +129,7 @@
                  <button type="button" class="removeItemBtn">Remove</button>`;
 
       itemsContainer.appendChild(div);
-      loadProducts();
+      populateSelect(div.querySelector(".productSelect"), cachedProducts);
 
       div.querySelector(".removeItemBtn").addEventListener("click", () => div.remove());
     });
